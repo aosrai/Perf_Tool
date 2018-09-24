@@ -1,13 +1,13 @@
-import mysql.connector
-from mysql.connector import errorcode as errc
+import mysql.connector #import mysql.connector,os
+from mysql.connector import errorcode as errc #from mysql.connector import errorcode as errc, import connection
 from mysql.connector import connection
 import os
 from Time_Perf import SelectedTime
 
-dir = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
+dir = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/") #dòng này là seo ??? 
 
 def GetHostID():
-    host_config_file = open(dir + '/Config_File' + '/cnx_host.cfg', 'r')
+    host_config_file = open(dir + '/Config_File' + '/cnx_host.cfg', 'r') 
     line = host_config_file.readline()
     global list_host
     list_host = line.split(' ')
