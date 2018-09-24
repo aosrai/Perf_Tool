@@ -1,0 +1,5 @@
+proc.mem[,,,^./vnreport.exe,rss]
+cpu.usage
+proc.mem[,,,(.*)?aggr95.exe -m -(M|m)(.*)?,rss]
+disk.iops
+disk.throughput

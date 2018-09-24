@@ -1,0 +1,4 @@
+cpu.usage
+disk.iops
+disk.throughput
+proc.cpu.util[,,,^./aggr.exe(.*)?HOURLY -T HOURLY_DAILY(.*)]

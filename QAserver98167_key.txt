@@ -1,0 +1,5 @@
+cpu.usage
+disk.iops
+disk.throughput
+proc.cpu.util[,,,(.*)?-Djsse.enableSNIExtension=false com.lucent.vital.sm.SMServer -start VNA]
+proc.cpu.util[,,,^ucollector]
