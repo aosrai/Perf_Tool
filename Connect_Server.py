@@ -27,40 +27,47 @@ def prepareInfo():
                     global list_value
                     list_value = cursor.fetchall()
                     list_value = [value[0] for value in list_value]
+                    cursor.execute("SELECT DISTINCT name FROM items WHERE hostid IN (SELECT hostid FROM hosts WHERE host = '{}') AND key_='{}'".format(host,key))
+                    global list_name
+                    list_name = cursor.fetchall()
+                    list_name = [name[0] for name in list_name]
+                    for value in list_value:
+                        global pairs
+                        pairs = {key:value}
+
 
 def getData():
     from_unixtime = "FROM_UNIXTIME(clock, '%Y/%m/%d %H:%i:%s.%f') AS "
-    table = {0:'history', 1:'history_str', 2:'history_log', 3:'history_uint', 4:'history_text'}
     for host in list_host:
-        for key in list_key:
-            for value in list_value:
-                cursor = cnx.cursor()
-                global itemid
-                if user_input == 'd':
-                    yesterday, present_day = defaultTime()
-                    cursor.execute("SELECT DISTINCT " + from_unixtime + "clock, a.host, b.name, b.key_, b.itemid, value, b.units "
+        for key,value in pairs.items():
+            table = ['history', 'history_str', 'history_log', 'history_uint', 'history_text']
+            cursor = cnx.cursor()
+            global itemid
+            if user_input == 'd':
+                yesterday, present_day = defaultTime()
+                cursor.execute("SELECT DISTINCT " + from_unixtime + "clock, a.host, b.name, b.key_, b.itemid, value, b.units "
                                                                         "FROM hosts a, items b, {} c "
                                                                         "WHERE a.host in (SELECT host FROM hosts WHERE host='{}') "
                                                                         "AND b.itemid in(SELECT itemid FROM items WHERE key_='{}') "
                                                                         "AND a.hostid=b.hostid AND b.itemid=c.itemid "
                                                                         "AND clock >= UNIX_TIMESTAMP('{}') AND clock <= UNIX_TIMESTAMP('{}') "
-                                                                        "ORDER BY clock ASC".format(table.get(value), host, key, yesterday, present_day))
-                    itemid = cursor.fetchall()
-                elif user_input == 'u':
-                    start_time, end_time = selectedTime()
-                    cursor.execute("SELECT DISTINCT " + from_unixtime + "clock, a.host, b.name, b.key_, b.itemid, value, b.units "
+                                                                        "ORDER BY clock ASC".format(table[value], host, key, yesterday, present_day))
+                itemid = cursor.fetchall()
+            elif user_input == 'u':
+                start_time, end_time = selectedTime()
+                cursor.execute("SELECT DISTINCT " + from_unixtime + "clock, a.host, b.name, b.key_, b.itemid, value, b.units "
                                                                         "FROM hosts a, items b, {} c "
                                                                         "WHERE a.host in (SELECT host FROM hosts WHERE host='{}') "
                                                                         "AND b.itemid in(SELECT itemid FROM items WHERE key_='{}') "
                                                                         "AND a.hostid=b.hostid AND b.itemid=c.itemid "
                                                                         "AND clock >= UNIX_TIMESTAMP('{}') AND clock <= UNIX_TIMESTAMP('{}') "
-                                                                        "ORDER BY clock ASC".format(table.get(value), host, key, start_time, end_time))
-                    itemid = cursor.fetchall()
+                                                                        "ORDER BY clock ASC".format(table[value], host, key, start_time, end_time))
+                itemid = cursor.fetchall()
 
 def createReport():
     for host in list_host:
         for key in list_key:
-            with xlsx.Workbook(dir + '/Report/' + host + '_Data_' + dt.now().strftime("%Y_%m_%d-%H-%M-%S") + '.xlsx') as wb:
+            with xlsx.Workbook(dir + '/Report/' + host + '_Report_' + dt.now().strftime("%Y_%m_%d-%H-%M-%S") + '.xlsx') as wb:
                 cell_header_format = wb.add_format({'bold': True, 'align': 'center', 'border': 3})
                 cell_format = wb.add_format({'align': 'center', 'border': 3})
                 ##########
@@ -80,7 +87,8 @@ def createReport():
                 chartsheet = wb.add_chartsheet(name="Graphs " + head_key)
                 chartsheet.set_paper(8)
                 chart = wb.add_chart({'type': 'column'})
-                chart.set_title({'name': '%s' % head_key})
+                for name in list_name:
+                    chart.set_title({'name': '{}'.format(name)})
                 chart.set_size({'x_scale': 3.2, 'y_scale': 1.2})
                 chart.set_x_axis({'num_font': {'bold': False, 'italic': True, 'rotation': -45}, 'name': 'Time'})
                 chart.set_y_axis({'num_font': {'bold': False, 'italic': True}, 'name': 'Value'})
@@ -92,9 +100,9 @@ def createReport():
                 count = 0
                 for item in itemid:
                     count = count + 1
-                chart.add_series({'categories': ['%s' % head_key, 1, 0, count, 0], 'values': ['%s' % head_key, 1, 4, count, 4], 'name': '%s' % head_key})
+                chart.add_series({'categories': ['{}'.format(head_key), 1, 0, count, 0], 'values': ['{}'.format(head_key), 1, 4, count, 4], 'name': '{}'.format(head_key)})
                 chartsheet.set_chart(chart)
-                print('Created report done!')
+                print('Created report for host {} done!'.format(host))
             wb.close()
 
 def Connect():
