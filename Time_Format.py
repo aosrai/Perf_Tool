@@ -3,9 +3,9 @@ from datetime import timedelta
 
 
 def selectedTime():
-    start_time = input('Start time is: ')
-    end_time = input('End time is: ')
-    return start_time, end_time
+    startTime = input('Start time is: ')
+    endTime = input('End time is: ')
+    return startTime, endTime
 
 def defaultTime():
     format_yesterday = dt.now() - timedelta(1)
